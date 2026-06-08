@@ -9,16 +9,36 @@ body{
 .container{
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    width: 50%;
+    gap: 30px;
+}
+input{
+    padding: 20px;
+    width: 90%;
 }
 .buttons-div{
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
+.functional{
+    display: flex;
+    flex-direction: row;
+    gap: 25px;
+}
 .all-buttons{
     display: flex;
     flex-direction: row;
-    gap: 20px;
-    flex-wrap: wrap;
+    gap: 30px;
+
+}
+button{
+    color:green;
+    padding: 20px;
+    width: 100%;
+    border-radius: 50%;
+    border: none;
+}
+.entry-div{
+    width: 100%;
 }

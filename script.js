@@ -1,51 +1,28 @@
+// Use generic number validation to allow decimals
+const isValid = (a, b) => typeof a === 'number' && !isNaN(a) && typeof b === 'number' && !isNaN(b);
 
-const add = ( a, b)=>{
-    if(!Number.isInteger(a)||!Number.isInteger(b)){
-        return 'NOT NUMBER';
-    }
-    return a + b;
-};
+const add = (a, b) => isValid(a, b) ? a + b : 'NOT NUMBER';
+const subtract = (a, b) => isValid(a, b) ? a - b : 'NOT NUMBER';
+const multiply = (a, b) => isValid(a, b) ? a * b : 'NOT NUMBER';
 
-const subtract = ( a, b)=>{
-    if(!Number.isInteger(a)||!Number.isInteger(b)){
-        return 'NOT NUMBER';
-    }
-    return a - b;
-};
-
-const multiply = ( a, b)=>{
-    if(!Number.isInteger(a)||!Number.isInteger(b)){
-        return 'NOT NUMBER';
-    }
-    return a * b;
-};
-
-const divide = ( a, b)=>{
-    if(!Number.isInteger(a)||!Number.isInteger(b)){
-        return 'NOT NUMBER';
-    }
-    if( a !== 0){
-        let num = a / b;
-        return num;
-    }
-
-    return 'MATH ERROR';
+const divide = (a, b) => {
+  if (!isValid(a, b)) return 'NOT NUMBER';
+  if (b === 0) return 'MATH ERROR'; // Fixed: Check divisor 'b', not dividend 'a'
+  return a / b;
 };
 
 const allButtons = document.querySelectorAll("button");
 const entry = document.querySelector("input");
 
-entry.addEventListener("keypress",(event) =>{
-    const allowedChars = /[0-9.]/;
-        const controlKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'];
-        if (controlKeys.includes(event.key)) {
-            return; 
-        }
-
-        if (!allowedChars.test(event.key)) {
-            event.preventDefault();
-        }
-      
+// Handle keyboard inputs
+entry.addEventListener("keypress", (event) => {
+  const allowedChars = /[0-9.]/;
+  const controlKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'];
+  
+  if (controlKeys.includes(event.key)) return;
+  if (!allowedChars.test(event.key)) {
+    event.preventDefault();
+  }
 });
 
 let entryList = [];
@@ -54,58 +31,75 @@ let operatorId = '';
 let singleNumber = '';
 
 allButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    const actionIds = ['plus-min', 'minus', 'plus', 'multiply',
+        'divide', 'equals', 'dot', 'clear', 'put', 'backspace', 'backspace1'];
+    
+    // Build the number if it is a digit
+    if (!actionIds.includes(button.id)) {
+      entryList.push(button.id);
+      singleNumber = entryList.join('');
+      entry.value = singleNumber;
+    }
+    
+    // Handle specific action buttons
+    switch (button.id) {
 
-    button.addEventListener("click",()=>{
-
-        const NotAllowedIds = ['plus-min','minus','plus','multiply','divide','equals','dot','clear','put'];
-
-        if(!NotAllowedIds.includes(button.id)){
-            entryList.push(button.id);
-        };
-
-        singleNumber = entryList.join('');
-
-        entry.value = singleNumber;
-
-        if(NotAllowedIds.includes(button.id)){
-            entry.value = '';
-        };
-
-        // console.log(entryList)
-        // console.log(singleNumber)
-
-        switch(button.id){
-            case 'plus':
-            case 'minus':
-            case 'multiply':
-            case 'divide':
-                    firstNumber = Number(singleNumber);
-                    operatorId = button.id;
-                    singleNumber = '';
-                    entry.value = '';
-                    entryList =[''];
-                  
+        case 'dot':
+            if (!entryList.includes('.')) { // Prevent multiple decimals
+                entryList.push('.');
+                singleNumber = entryList.join('');
+                entry.value = singleNumber;
+            }
             break;
+
+        case 'plus':
+        case 'minus':
+        case 'multiply':
+
+        case 'divide':
+            if (singleNumber !== '') {
+                firstNumber = Number(singleNumber);
+                operatorId = button.id;
+                entryList = []; // Clear for next number
+                singleNumber = '';
+                entry.value = '';
+            }
+            break;
+            
+        case 'equals':
+            if (operatorId && singleNumber !== '') {
+                let secondNumber = Number(singleNumber);
+                let result = 0;
                 
-            case 'equals':
-
-                singleNumber = Number(singleNumber);
-
-                if(operatorId === 'plus') result = add(firstNumber,singleNumber);
-                if(operatorId === 'minus') result = subtract(firstNumber,singleNumber);
-                if(operatorId === 'multiply') result = multiply(firstNumber,singleNumber);
-                if(operatorId === 'divide') result = divide(firstNumber,singleNumber);
-
+                if (operatorId === 'plus') result = add(firstNumber, secondNumber);
+                if (operatorId === 'minus') result = subtract(firstNumber, secondNumber);
+                if (operatorId === 'multiply') result = multiply(firstNumber, secondNumber);
+                if (operatorId === 'divide') result = divide(firstNumber, secondNumber);
+                
                 entry.value = result;
                 
-                break;    
-        } 
+                // Reset state and store result for chained operations
+                singleNumber = String(result);
+                entryList = singleNumber.split(''); 
+                operatorId = '';
+            }
+            break;
+            
+        case 'clear':
+            entryList = [];
+            firstNumber = 0;
+            operatorId = '';
+            singleNumber = '';
+            entry.value = '';
+            break;
+
+        case 'backspace':
+        case 'backspace1':
+            entryList.pop(); 
+            singleNumber = entryList.join(''); 
+            entry.value = singleNumber; 
+            break;
+        }
     });
-    
 });
-
-
-
-
-
-
